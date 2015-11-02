@@ -158,7 +158,7 @@ def extractType1Glyphs(source, destination):
         # width
         destinationGlyph.width = sourceGlyph.width
         # synthesize the unicode value
-        destinationGlyph.unicode = AGL2UV.get(glyphName)
+        destinationGlyph.str = AGL2UV.get(glyphName)
 
 # -----------
 # Glyph order

@@ -118,7 +118,7 @@ def _extractInfoName(source, info):
         openTypeNameWWSFamilyName=_priorityOrder(21),
         openTypeNameWWSSubfamilyName=_priorityOrder(22)
     )
-    for attr, priority in attributes.items():
+    for attr, priority in list(attributes.items()):
         value = _skimNameIDs(nameIDs, priority)
         if value is not None:
             setattr(info, attr, value)
@@ -134,7 +134,7 @@ def _priorityOrder(nameID):
 
 def _skimNameIDs(nameIDs, priority):
     for (nameID, platformID, platEncID, langID) in priority:
-        for (nID, pID, pEID, lID), text in nameIDs.items():
+        for (nID, pID, pEID, lID), text in list(nameIDs.items()):
             if nID != nameID:
                 continue
             if pID != platformID and platformID is not None:
@@ -216,7 +216,7 @@ def _extracInfoOS2(source, info):
     copyAttr(os2, "yStrikeoutPosition", info, "openTypeOS2StrikeoutPosition")
 
 def _extractInfoHhea(source, info):
-    if not source.has_key("hhea"):
+    if "hhea" not in source:
         return
     hhea = source["hhea"]
     info.openTypeHheaAscender = hhea.ascent
@@ -227,7 +227,7 @@ def _extractInfoHhea(source, info):
     info.openTypeHheaCaretOffset = hhea.caretOffset
 
 def _extractInfoVhea(source, info):
-    if not source.has_key("vhea"):
+    if "vhea" not in source:
         return
     vhea = source["vhea"]
     info.openTypeVheaVertTypoAscender = vhea.ascent
@@ -247,7 +247,7 @@ def _extractInfoPost(source, info):
     info.postscriptIsFixedPitch = bool(post.isFixedPitch)
 
 def _extractInfoCFF(source, info):
-    if not source.has_key("CFF "):
+    if "CFF " not in source:
         return
     cff = source["CFF "].cff
     info.postscriptFontName = cff.fontNames[0]
@@ -275,7 +275,7 @@ def _extractInfoCFF(source, info):
     # XXX postscriptUniqueID
 
 def _extractInfoGasp(source, info):
-    if not source.has_key("gasp"):
+    if "gasp" not in source:
         return
     gasp = source["gasp"]
     records = []
@@ -336,11 +336,11 @@ def extractOpenTypeGlyphs(source, destination):
         break
     reversedMapping = {}
     if table is not None:
-        for uniValue, glyphName in table.cmap.items():
+        for uniValue, glyphName in list(table.cmap.items()):
             reversedMapping[glyphName] = uniValue
     # grab the glyphs
     glyphSet = source.getGlyphSet()
-    for glyphName in glyphSet.keys():
+    for glyphName in list(glyphSet.keys()):
         sourceGlyph = glyphSet[glyphName]
         # make the new glyph
         destination.newGlyph(glyphName)
@@ -351,7 +351,7 @@ def extractOpenTypeGlyphs(source, destination):
         # width
         destinationGlyph.width = sourceGlyph.width
         # unicode
-        destinationGlyph.unicode = reversedMapping.get(glyphName)
+        destinationGlyph.str = reversedMapping.get(glyphName)
 
 # -------
 # Kerning
@@ -365,7 +365,7 @@ def extractOpenTypeKerning(source, destination):
     elif "kern" in source:
         kerning = _extractOpenTypeKerningFromKern(source)
         groups = {}
-    for name, group in groups.items():
+    for name, group in list(groups.items()):
         groups[name] = list(sorted(group))
     return kerning, groups
 
@@ -488,7 +488,7 @@ def _gatherLookupIndexes(gpos):
         scriptKernFeatureIndexes[script] = thisScriptKernFeatureIndexes
     # convert the feature indexes to lookup indexes
     scriptLookupIndexes = {}
-    for script, featureDefinitions in scriptKernFeatureIndexes.items():
+    for script, featureDefinitions in list(scriptKernFeatureIndexes.items()):
         lookupIndexes = scriptLookupIndexes[script] = []
         for language, featureIndexes in featureDefinitions:
             for featureIndex in featureIndexes:
@@ -615,7 +615,7 @@ def _findSingleMemberGroups(classDictionaries):
     toRemove = {}
     for classDictionaryGroup in classDictionaries:
         for classDictionary in classDictionaryGroup:
-            for name, members in classDictionary.items():
+            for name, members in list(classDictionary.items()):
                 if len(members) == 1:
                     toRemove[name] = list(members)[0]
                     del classDictionary[name]
@@ -627,7 +627,7 @@ def _removeSingleMemberGroupReferences(kerning, leftGroups, rightGroups):
     if the group only contains one glyph.
     """
     new = {}
-    for (left, right), value in kerning.items():
+    for (left, right), value in list(kerning.items()):
         left = leftGroups.get(left, left)
         right = rightGroups.get(right, right)
         new[left, right] = value
@@ -653,14 +653,14 @@ def _mergeClasses(classDictionaries):
     memberTree = {}
     for classDictionaryGroup in classDictionaries:
         for classDictionary in classDictionaryGroup:
-            for name, members in classDictionary.items():
+            for name, members in list(classDictionary.items()):
                 if members not in memberTree:
                     memberTree[members] = set()
                 memberTree[members].add(name)
     # find members that have more than one name
     classes = {}
     rename = {}
-    for members, names in memberTree.items():
+    for members, names in list(memberTree.items()):
         name = names.pop()
         if len(names) > 0:
             for otherName in names:
@@ -673,7 +673,7 @@ def _setGroupNames(classes, classRename):
     Set the final names into the groups.
     """
     groups = {}
-    for groupName, glyphList in classes.items():
+    for groupName, glyphList in list(classes.items()):
         groupName = classRename.get(groupName, groupName)
         # if the glyph list has only one member,
         # the glyph name will be used in the pairs.
@@ -689,12 +689,12 @@ def _validateClasses(classes):
     one class. If this is found, an ExtractorError is raised.
     """
     glyphToClass = {}
-    for className, glyphList in classes.items():
+    for className, glyphList in list(classes.items()):
         for glyphName in glyphList:
             if glyphName not in glyphToClass:
                 glyphToClass[glyphName] = set()
             glyphToClass[glyphName].add(className)
-    for glyphName, groupList in glyphToClass.items():
+    for glyphName, groupList in list(glyphToClass.items()):
         if len(groupList) > 1:
             raise ExtractorError("Kerning classes are in an conflicting state.")
 
@@ -703,7 +703,7 @@ def _replaceRenamedPairMembers(kerning, leftRename, rightRename):
     Populate the renamed pair members into the kerning.
     """
     renamedKerning = {}
-    for (left, right), value in kerning.items():
+    for (left, right), value in list(kerning.items()):
         left = leftRename.get(left, left)
         right = rightRename.get(right, right)
         renamedKerning[left, right] = value
@@ -714,7 +714,7 @@ def _renameClasses(classes, prefix):
     Replace class IDs with nice strings.
     """
     renameMap = {}
-    for classID, glyphList in classes.items():
+    for classID, glyphList in list(classes.items()):
         if len(glyphList) == 0:
             groupName = "%s_empty_lu.%d_st.%d_cl.%d" % (prefix, classID[0], classID[1], classID[2])
         elif len(glyphList) == 1:
@@ -739,7 +739,7 @@ def _extractFeatureClasses(lookupIndex, subtableIndex, classDefs, coverage=None)
     """
     # gather the class members
     classDict = {}
-    for glyphName, classIndex in classDefs.items():
+    for glyphName, classIndex in list(classDefs.items()):
         if classIndex not in classDict:
             classDict[classIndex] = set()
         classDict[classIndex].add(glyphName)
@@ -751,12 +751,12 @@ def _extractFeatureClasses(lookupIndex, subtableIndex, classDefs, coverage=None)
                 revisedClass0.add(glyphName)
     elif coverage is not None and 0 not in classDict:
         revisedClass0 = set(coverage)
-        for glyphList in classDict.values():
+        for glyphList in list(classDict.values()):
             revisedClass0 = revisedClass0 - glyphList
     classDict[0] = revisedClass0
     # flip the class map around
     classes = {}
-    for classIndex, glyphList in classDict.items():
+    for classIndex, glyphList in list(classDict.items()):
         classes[lookupIndex, subtableIndex, classIndex] = frozenset(glyphList)
     return classes
 

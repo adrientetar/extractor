@@ -1,4 +1,4 @@
-from opentype import extractOpenTypeInfo, extractOpenTypeGlyphs, extractOpenTypeKerning
+from .opentype import extractOpenTypeInfo, extractOpenTypeGlyphs, extractOpenTypeKerning
 
 def isTTX(pathOrFile):
     from fontTools.ttLib import TTFont, TTLibError
