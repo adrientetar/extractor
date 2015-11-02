@@ -9,7 +9,7 @@ from extractor.tools import RelaxedInfo
 # ----------------
 # Public Functions
 # ----------------
-    
+
 def isType1(pathOrFile):
     try:
         font = _readT1Font(pathOrFile)
@@ -48,7 +48,7 @@ def _readT1Font(pathOrFile):
     import AppKit
     fileType, error = AppKit.NSWorkspace.sharedWorkspace().typeOfFile_error_(pathOrFile, None)
     normpath = pathOrFile.lower()
-    
+
     readFunc = None
     if fileType == "com.adobe.postscript-lwfn-font":
         readFunc = readLWFN
@@ -119,7 +119,7 @@ def _extractType1FontMatrix(source, info):
     # units per em
     matrix = source["FontMatrix"]
     matrix = Transform(*matrix).inverse()
-    info.unitsPerEm = int(round(matrix[3])) 
+    info.unitsPerEm = int(round(matrix[3]))
 
 def _extractType1Private(source, info):
     private = source["Private"]
@@ -158,7 +158,7 @@ def extractType1Glyphs(source, destination):
         # width
         destinationGlyph.width = sourceGlyph.width
         # synthesize the unicode value
-        destinationGlyph.str = AGL2UV.get(glyphName)
+        destinationGlyph.unicode = AGL2UV.get(glyphName)
 
 # -----------
 # Glyph order
@@ -185,5 +185,3 @@ def _extractType1GlyphOrder(t1Font):
     interpreter = GlyphOrderPSInterpreter()
     interpreter.interpret(t1Font.data)
     return interpreter.glyphOrder
-
-
